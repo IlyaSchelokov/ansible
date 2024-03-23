@@ -1,0 +1,47 @@
+---
+- name: Install nginx via apt
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+- name: Start service nginx, if not started
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+- name: Check 80 port
+  ansible.builtin.wait_for:
+    port: 80
+    state: started
+- name: Replace nginx.conf
+  template:  
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify: Reload Nginx configuration
+- name: Add VH in template
+  template:
+    src: "{{ item.j2_extension }}"
+    dest: /etc/nginx/sites-available/{{ item.conf_extension }}
+  loop:
+    - { j2_extension: virtualhost1.conf.j2, conf_extension: virtualhost1.conf }
+    - { j2_extension: virtualhost2.conf.j2, conf_extension: virtualhost2.conf }
+    - { j2_extension: virtualhost3.conf.j2, conf_extension: virtualhost3.conf }
+  notify: Reload Nginx configuration
+- name: Enable new sites
+  file:
+    src: /etc/nginx/sites-available/{{ item }}
+    dest: /etc/nginx/sites-enabled/{{ item }}
+    state: link
+  loop:
+    - virtualhost1.conf
+    - virtualhost2.conf
+    - virtualhost3.conf
+  notify: Reload Nginx configuration
+- name: Copy index files to the Nginx directory
+  template:  
+    src: "{{ item.j2_extension }}"
+    dest: /var/www/html/{{ item.html_extension }}
+  loop:
+    - { j2_extension: index_1.html.j2, html_extension: index_1.html }
+    - { j2_extension: index_2.html.j2, html_extension: index_2.html }
+    - { j2_extension: index_3.html.j2, html_extension: index_3.html }

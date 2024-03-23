@@ -1,0 +1,11 @@
+server {
+        listen {{ port_number_VH2 }} default_server;
+        listen [::]:{{ port_number_VH2 }} default_server;
+        root /var/www/html;
+        index index_2.html index.htm index.nginx-debian.html;
+        server_name {{ ansible_host }};
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+}

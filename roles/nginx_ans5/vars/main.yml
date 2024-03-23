@@ -1,0 +1,5 @@
+---
+worker_conn_count: 768
+timeout_count: 65
+max_size_count: 2048
+ports: ['10','20','30','40']
