@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 all:
   hosts:
     my_host:
@@ -7,3 +8,13 @@ all:
       ansible_user: ${login}
     vars:
       ansible_ssh_private_key_file: "/home/user/.ssh/id_rsa"
+=======
+myhosts:
+ hosts:
+  my_host_01:
+    ansible_host: ${ip}
+    ansible_connection: ssh
+    ansible_port: 22
+    ansible_user: ${login}
+    ansible_ssh_private_key_file: "/home/user/.ssh/id_rsa"
+>>>>>>> d0e2ce738e9fa10581fb15cdc61131fc0dd1eb4b

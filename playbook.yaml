@@ -1,5 +1,80 @@
 ---
+<<<<<<< HEAD
 - hosts: my_host
   become: true
   roles:
     - nginx_ans5
+=======
+- hosts: myhosts
+  become: true
+  vars: 
+    port_number_VH1: 100
+    port_number_VH2: 200
+    port_number_VH3: 300
+  tasks:
+  
+  - name: Install nginx via apt
+    ansible.builtin.apt:
+      name: nginx
+      state: present
+      update_cache: true
+      
+  - name: Start service nginx, if not started
+    ansible.builtin.service:
+      name: nginx
+      state: started
+      enabled: yes      
+      
+  - name: Check 80 port
+    ansible.builtin.wait_for:
+      port: 80
+      state: started
+
+  - name: Replace nginx.conf
+    vars: 
+      worker_conn_count: 768
+      timeout_count: 65
+      max_size_count: 2048
+    template:  
+      src: nginx.conf.j2
+      dest: /etc/nginx/nginx.conf
+    notify: Reload Nginx configuration
+           
+  - name: Add VH in template
+    template:
+      src: "{{ item.j2_extension }}"
+      dest: /etc/nginx/sites-available/{{ item.conf_extension }}
+    loop:
+      - { j2_extension: virtualhost1.conf.j2, conf_extension: virtualhost1.conf }
+      - { j2_extension: virtualhost2.conf.j2, conf_extension: virtualhost2.conf }
+      - { j2_extension: virtualhost3.conf.j2, conf_extension: virtualhost3.conf }
+    notify: Reload Nginx configuration
+     
+  - name: Enable new sites
+    file:
+      src: /etc/nginx/sites-available/{{ item }}
+      dest: /etc/nginx/sites-enabled/{{ item }}
+      state: link
+    loop:
+      - virtualhost1.conf
+      - virtualhost2.conf
+      - virtualhost3.conf
+    notify: Reload Nginx configuration
+      
+  - name: Copy index files to the Nginx directory
+    vars:
+      ports: ['10','20','30','40']
+    template:  
+      src: "{{ item.j2_extension }}"
+      dest: /var/www/html/{{ item.html_extension }}
+    loop:
+      - { j2_extension: index_1.html.j2, html_extension: index_1.html }
+      - { j2_extension: index_2.html.j2, html_extension: index_2.html }
+      - { j2_extension: index_3.html.j2, html_extension: index_3.html }
+    
+  handlers:
+  - name: Reload Nginx configuration
+    systemd:
+      name: nginx
+      state: reloaded
+>>>>>>> d0e2ce738e9fa10581fb15cdc61131fc0dd1eb4b
